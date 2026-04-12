@@ -2,7 +2,7 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import dynamic from "next/dynamic";
 import {
   ArrowLeft, MapPin, Navigation,
@@ -14,34 +14,34 @@ import VehicleBookingCard from "@/components/VehicleBookingCard";
 const RouteMap = dynamic(() => import("@/components/RouteMap"), { ssr: false });
 
 const VEHICLE_META: any = {
-  bike:    { label: "Bike",    Icon: Bike  },
-  auto:    { label: "Auto",    Icon: Car   },
-  car:     { label: "Car",     Icon: Car   },
+  bike: { label: "Bike", Icon: Bike },
+  auto: { label: "Auto", Icon: Car },
+  car: { label: "Car", Icon: Car },
   loading: { label: "Loading", Icon: Truck },
-  truck:   { label: "Truck",   Icon: Truck },
+  truck: { label: "Truck", Icon: Truck },
 };
 
-export default function SearchPage() {
+function SearchContent() {
   const params = useSearchParams();
   const router = useRouter();
 
-  const [pickup,   setPickup]   = useState(params.get("pickup") || "");
-  const [drop,     setDrop]     = useState(params.get("drop") || "");
-  const [km,       setKm]       = useState<number | null>(null);
+  const [pickup, setPickup] = useState(params.get("pickup") || "");
+  const [drop, setDrop] = useState(params.get("drop") || "");
+  const [km, setKm] = useState<number | null>(null);
   const [vehicles, setVehicles] = useState<any[]>([]);
-  const [loading,  setLoading]  = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const vehicle      = params.get("vehicle") || "";
+  const vehicle = params.get("vehicle") || "";
   const mobileNumber = params.get("mobileNumber") || "";
-  const pickupLat    = Number(params.get("pickupLat"));
-  const pickupLng    = Number(params.get("pickupLng"));
-  const meta         = VEHICLE_META[vehicle];
-  const eta          = km !== null ? Math.max(3, Math.round((km / 25) * 60)) : null;
+  const pickupLat = Number(params.get("pickupLat"));
+  const pickupLng = Number(params.get("pickupLng"));
+  const meta = VEHICLE_META[vehicle];
+  const eta = km !== null ? Math.max(3, Math.round((km / 25) * 60)) : null;
 
   async function fetchNearbyVehicles(lat: number, lng: number) {
     try {
       setLoading(true);
-      const res  = await fetch("/api/vehicles/nearby", {
+      const res = await fetch("/api/vehicles/nearby", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ latitude: lat, longitude: lng, vehicleType: vehicle }),
@@ -158,8 +158,8 @@ export default function SearchPage() {
                 {loading
                   ? "Finding vehicles…"
                   : vehicles.length > 0
-                  ? `${vehicles.length} Available`
-                  : "No vehicles nearby"}
+                    ? `${vehicles.length} Available`
+                    : "No vehicles nearby"}
               </h2>
               {meta && (
                 <p className="text-zinc-400 text-xs mt-0.5">
@@ -237,14 +237,14 @@ export default function SearchPage() {
                   onBook={() => {
                     const url = new URLSearchParams({
                       pickup, drop,
-                      vehicle:    v.type,
-                      driverId:   v.owner,
-                      vehicleId:  v._id,
-                      fare:       String(Math.round(v.baseFare + (km ?? 0) * v.pricePerKm)),
-                      pickupLat:  String(pickupLat),
-                      pickupLng:  String(pickupLng),
-                      dropLat:    params.get("dropLat") || "",
-                      dropLng:    params.get("dropLng") || "",
+                      vehicle: v.type,
+                      driverId: v.owner,
+                      vehicleId: v._id,
+                      fare: String(Math.round(v.baseFare + (km ?? 0) * v.pricePerKm)),
+                      pickupLat: String(pickupLat),
+                      pickupLng: String(pickupLng),
+                      dropLat: params.get("dropLat") || "",
+                      dropLng: params.get("dropLng") || "",
                       mobileNumber,
                     });
                     router.push(`/checkout?${url.toString()}`);
@@ -257,5 +257,13 @@ export default function SearchPage() {
         </div>
       </motion.div>
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-zinc-100 flex items-center justify-center font-bold">Loading...</div>}>
+      <SearchContent />
+    </Suspense>
   );
 }
