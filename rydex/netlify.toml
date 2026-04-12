@@ -1,0 +1,7 @@
+[build]
+base = "rydex"
+command = "npm run build"
+publish = ".next"
+
+[functions]
+directory = "netlify/functions"
