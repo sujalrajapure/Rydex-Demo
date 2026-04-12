@@ -174,7 +174,19 @@ const handleReject = async () => {
         ? "Admin"
         : `${userData?.name} (${userData?.email})`;
 
-      const userId = userData?._id.toString()!;
+      const userId = userData?._id?.toString() || `user_${Math.floor(Math.random() * 100000)}`;
+
+      // Console log for debugging the environment variables
+      console.log("ZEGO INIT CHECK:", { 
+        appID, 
+        hasServerSecret: !!serverSecret,
+        roomId,
+        userId
+      });
+
+      if (!serverSecret) {
+         throw new Error("Missing NEXT_PUBLIC_ZEGO_SERVER_SECRET. You MUST restart your Next.js server!");
+      }
 
       const kitToken =
         ZegoUIKitPrebuilt.generateKitTokenForTest(
