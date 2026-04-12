@@ -10,6 +10,7 @@ import {
   ImagePlus,
   AlertTriangle,
   Video,
+  Loader2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -240,9 +241,12 @@ const activeStep = getActiveStep();
         animate={{ opacity: 1, y: 0 }}
         className="bg-black text-white rounded-3xl p-10 shadow-2xl"
       >
-        <h2 className="text-2xl font-bold">
-          🚀 You’re Live
+        <h2 className="text-2xl font-bold flex items-center gap-2">
+          🚀 You’re Live!
         </h2>
+        <p className="mt-2 text-gray-300">
+          Your vendor onboarding is 100% complete. You can now accept rides.
+        </p>
 
         <button
           onClick={() => router.push("/partner/bookings")}
@@ -252,6 +256,11 @@ const activeStep = getActiveStep();
         </button>
       </motion.div>
     );
+  }
+
+  // Show a loading state if pricing is still fetching from the server
+  if (activeStep >= 6 && pricing === null) {
+     return <div className="p-10 flex justify-center"><Loader2 className="animate-spin text-gray-400" size={30} /></div>;
   }
 
   return null;
@@ -286,8 +295,9 @@ const activeStep = getActiveStep();
 
             <div className="relative flex justify-between">
               {STEPS.map((step) => {
-                const completed = activeStep > step.id;
-                const active = activeStep === step.id;
+                const isFullyLive = activeStep === 8 && pricing?.status === "approved";
+                const completed = activeStep > step.id || (isFullyLive && step.id === 8);
+                const active = activeStep === step.id && !isFullyLive;
                 const locked = step.id > activeStep;
 
                 return (
