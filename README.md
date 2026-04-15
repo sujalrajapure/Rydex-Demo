@@ -2,7 +2,6 @@
 
 A full-stack ride-sharing platform built with Next.js 16 (App Router). Supports user ride booking, driver (partner) management, admin dashboard, real-time tracking/chat/video KYC, and payments via Razorpay/Stripe. Deployed on Netlify.
 
-[![Netlify](https://img.shields.io/netlify/?style=flat-square)](https://netlify.toml)
 
 ## ✨ Features
 
